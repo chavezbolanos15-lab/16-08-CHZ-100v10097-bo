@@ -361,12 +361,7 @@ class MasterOrchestrator:
                 visual_results['proofs'] = self._generate_basic_visual_proofs(data)
             
             # Visual Proofs Director
-            visual_results['experiences'] = visual_proofs_director.create_transformative_experience(
-                data.get('segmento', ''),
-                data.get('produto', ''),
-                data.get('web_research', {}),
-                data.get('social_analysis', {})
-            )
+            visual_results['experiences'] = visual_proofs_director.create_transformative_experience(data)
             
             return visual_results
             

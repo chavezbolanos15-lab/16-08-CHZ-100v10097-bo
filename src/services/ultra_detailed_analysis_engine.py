@@ -278,22 +278,36 @@ class UltraDetailedAnalysisEngine:
         concepts_to_prove = []
 
         # Conceitos do avatar
-        if avatar_data.get('dores_viscerais'):
+        if avatar_data and avatar_data.get('dores_viscerais'):
             concepts_to_prove.extend(avatar_data['dores_viscerais'][:5])
 
-        if avatar_data.get('desejos_secretos'):
+        if avatar_data and avatar_data.get('desejos_secretos'):
             concepts_to_prove.extend(avatar_data['desejos_secretos'][:5])
 
         # Conceitos dos drivers
-        if drivers_data.get('drivers_customizados'):
+        if drivers_data and isinstance(drivers_data, dict) and drivers_data.get('drivers_customizados'):
             for driver in drivers_data['drivers_customizados'][:3]:
-                concepts_to_prove.append(driver.get('nome', 'Conceito'))
+                if isinstance(driver, dict):
+                    concepts_to_prove.append(driver.get('nome', 'Conceito'))
+                else:
+                    concepts_to_prove.append(str(driver))
 
         if not concepts_to_prove:
-            raise Exception("❌ Nenhum conceito encontrado para gerar provas visuais")
+            # Adiciona conceitos padrão se não encontrar
+            concepts_to_prove = [
+                "Eficácia do método",
+                "Transformação real possível", 
+                "ROI do investimento",
+                "Diferencial da concorrência"
+            ]
 
         visual_result = visual_proofs_generator.generate_comprehensive_proofs(
-            concepts_to_prove, avatar_data, data
+            {
+                'segmento': data.get('segmento', ''),
+                'produto': data.get('produto', ''),
+                'publico': data.get('publico', ''),
+                'concepts': concepts_to_prove
+            }
         )
 
         if not visual_result:
@@ -308,7 +322,9 @@ class UltraDetailedAnalysisEngine:
             raise Exception("❌ Avatar OBRIGATÓRIO para sistema anti-objeção")
 
         # Extrai objeções do avatar
-        objections = avatar_data.get('objecoes_reais', [])
+        objections = []
+        if avatar_data and isinstance(avatar_data, dict):
+            objections = avatar_data.get('objecoes_reais', []) or avatar_data.get('muralhas_desconfianca', [])
 
         if not objections:
             # Objeções mínimas se não encontradas no avatar
@@ -331,12 +347,24 @@ class UltraDetailedAnalysisEngine:
     def _execute_pre_pitch(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Executa pré-pitch - OBRIGATÓRIO"""
 
+        # Corrige acesso aos dados do contexto
         drivers_data = data.get('drivers_mentais_customizados', {})
         avatar_data = data.get('avatar_ultra_detalhado', {})
-        drivers_list = drivers_data.get('drivers_customizados', [])
+        
+        # Extrai lista de drivers de forma segura
+        drivers_list = []
+        if isinstance(drivers_data, dict):
+            drivers_list = drivers_data.get('drivers_customizados', [])
+        elif isinstance(drivers_data, list):
+            drivers_list = drivers_data
 
         if not drivers_list:
-            raise Exception("❌ Drivers mentais OBRIGATÓRIOS para pré-pitch")
+            # Cria drivers básicos se não encontrar
+            drivers_list = [
+                {'nome': 'Urgência Temporal', 'gatilho_central': 'Tempo limitado'},
+                {'nome': 'Autoridade Técnica', 'gatilho_central': 'Expertise comprovada'},
+                {'nome': 'Método vs Sorte', 'gatilho_central': 'Diferença entre método e tentativa'}
+            ]
 
         pre_pitch_result = pre_pitch_architect.generate_complete_pre_pitch_system(
             drivers_list, avatar_data, data

@@ -238,6 +238,40 @@ class AIManager:
             self._record_failure(provider_name, str(e))
             return self._try_fallback(prompt, max_tokens, exclude=[provider_name])
 
+    def _try_fallback(self, prompt: str, max_tokens: int, exclude: List[str]) -> Optional[str]:
+        """Tenta usar o próximo provedor disponível como fallback."""
+        logger.info(f"🔄 Acionando fallback, excluindo: {', '.join(exclude)}")
+
+        # Ordena provedores por prioridade, excluindo os que já falharam
+        available_providers = [
+            (name, provider) for name, provider in self.providers.items()
+            if (provider['available'] and
+                name not in exclude and
+                provider['consecutive_failures'] < provider.get('max_errors', 2))
+        ]
+
+        if not available_providers:
+            logger.critical("❌ Todos os provedores de fallback falharam.")
+            return None
+
+        # Ordena por prioridade
+        available_providers.sort(key=lambda x: (x[1]['priority'], x[1]['consecutive_failures']))
+        next_provider = available_providers[0][0]
+
+        logger.info(f"🔄 Tentando fallback para: {next_provider.upper()}")
+
+        try:
+            result = self._call_provider(next_provider, prompt, max_tokens)
+            if result:
+                self._record_success(next_provider)
+                return result
+            else:
+                raise Exception("Resposta vazia do fallback")
+        except Exception as e:
+            logger.error(f"❌ Fallback para {next_provider} também falhou: {e}")
+            self._record_failure(next_provider, str(e))
+            return self._try_fallback(prompt, max_tokens, exclude + [next_provider])
+
     def generate_parallel_analysis(self, prompts: List[Dict[str, Any]], max_tokens: int = 8192) -> Dict[str, Any]:
         """Gera múltiplas análises em paralelo usando diferentes provedores"""
 
@@ -334,7 +368,19 @@ class AIManager:
     def _generate_with_groq(self, prompt: str, max_tokens: int) -> Optional[str]:
         """Gera conteúdo usando Groq."""
         client = self.providers['groq']['client']
-        content = client.generate(prompt, max_tokens=min(max_tokens, 8192))
+        if hasattr(client, 'generate'):
+            content = client.generate(prompt, max_tokens=min(max_tokens, 8192))
+        else:
+            # Fallback para interface padrão do Groq
+            from groq import Groq
+            groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+            response = groq_client.chat.completions.create(
+                model="llama3-70b-8192",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=min(max_tokens, 8192),
+                temperature=0.7
+            )
+            content = response.choices[0].message.content
         if content:
             logger.info(f"✅ Groq gerou {len(content)} caracteres")
             return content

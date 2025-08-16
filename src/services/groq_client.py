@@ -50,16 +50,35 @@ class GroqClient:
             logger.error(f"❌ Falha ao inicializar o cliente Groq: {e}")
             self.available = False
 
-            try:
-                self.client = Groq(api_key=self.api_key)
-                self.available = True
-                logger.info("✅ Cliente Groq (llama3-70b-8192) inicializado com sucesso.")
-            except Exception as e:
-                logger.error(f"❌ Falha ao inicializar o cliente Groq: {e}", exc_info=True)
 
     def is_enabled(self) -> bool:
         """Verifica se o cliente está configurado e pronto para uso."""
         return self.available and self.client is not None
+
+    def chat(self, messages: List[Dict[str, str]], max_tokens: int = 8192, **kwargs) -> Dict[str, Any]:
+        """Interface de chat compatível com outros clientes"""
+        if not self.is_enabled():
+            raise Exception("Cliente Groq não está habilitado ou configurado corretamente.")
+        
+        try:
+            # Extrai conteúdo da mensagem do usuário
+            user_message = ""
+            for message in messages:
+                if message.get("role") == "user":
+                    user_message = message.get("content", "")
+                    break
+            
+            # Gera resposta
+            response_text = self.generate(user_message, max_tokens)
+            
+            return {
+                'content': response_text,
+                'message': response_text
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Erro na interface de chat Groq: {e}")
+            raise
 
     def generate(self, prompt: str, max_tokens: int = 8192) -> Optional[str]:
         """

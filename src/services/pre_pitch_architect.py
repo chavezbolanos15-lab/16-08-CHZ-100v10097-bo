@@ -22,6 +22,13 @@ class PrePitchArchitect:
         """Inicializa o arquiteto de pré-pitch"""
         from .ai_manager import ai_manager
         self.ai_manager = ai_manager
+        
+        # Carrega fases psicológicas
+        self.psychological_phases = self._load_psychological_phases()
+        
+        # Carrega templates de transição
+        self.transition_templates = self._load_transition_templates()
+        
         logger.info("Pre-Pitch Architect inicializado")
 
     def create_pre_pitch_strategy(self, segmento: str, produto: str, web_data: Dict = None, social_data: Dict = None) -> Dict[str, Any]:
@@ -443,6 +450,17 @@ Formato JSON estruturado.
                     'drivers_utilizados': [driver['nome'] for driver in phase_drivers],
                     'resultado_esperado': phase_data['resultado_esperado'],
                     'tecnicas': self._get_phase_techniques(phase_name, phase_drivers)
+                })
+            else:
+                # Adiciona fase mesmo sem drivers específicos
+                psychological_sequence.append({
+                    'fase': phase_name,
+                    'objetivo': phase_data['objetivo'],
+                    'duracao': phase_data['duracao'],
+                    'intensidade': phase_data['intensidade'],
+                    'drivers_utilizados': [],
+                    'resultado_esperado': phase_data['resultado_esperado'],
+                    'tecnicas': self._get_phase_techniques(phase_name, [])
                 })
 
         return {

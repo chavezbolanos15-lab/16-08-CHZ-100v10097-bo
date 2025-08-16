@@ -569,6 +569,34 @@ RETORNE APENAS JSON VÁLIDO:
             # Retorna scripts básicos em vez de falhar
             return self._create_basic_scripts(avatar_data, context_data)
 
+    def _create_basic_scripts(self, avatar_data: Dict[str, Any], context_data: Dict[str, Any]) -> Dict[str, List[str]]:
+        """Cria scripts básicos como fallback"""
+        
+        segmento = context_data.get('segmento', 'negócios')
+        
+        return {
+            "scripts_tempo": [
+                f"Cada dia sem otimizar {segmento} é uma oportunidade perdida",
+                f"Seus concorrentes em {segmento} não estão esperando você se decidir",
+                f"O tempo que você gasta 'pensando' outros usam para agir"
+            ],
+            "scripts_dinheiro": [
+                f"Investimento em {segmento} se paga em 2-4 meses com implementação correta",
+                f"O que você perde NÃO investindo é maior que o valor do investimento",
+                f"ROI médio em {segmento}: 300-500% em 12 meses"
+            ],
+            "scripts_confianca": [
+                f"Metodologia comprovada especificamente para {segmento}",
+                f"Resultados documentados de profissionais como você em {segmento}",
+                f"Garantia específica: resultados em 60 dias ou dinheiro de volta"
+            ],
+            "scripts_emergencia": [
+                "A única diferença entre você e quem já conseguiu é a decisão de agir",
+                "Quantas oportunidades você já perdeu por 'pensar demais'?",
+                "O medo de errar está te impedindo de acertar"
+            ]
+        }
+
     def _create_basic_counter_attacks(self, context_data: Dict[str, Any]) -> Dict[str, Any]:
         """Cria contra-ataques básicos como fallback"""
 

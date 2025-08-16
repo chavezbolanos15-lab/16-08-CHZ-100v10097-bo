@@ -136,8 +136,8 @@ class HealthChecker:
     def _check_ai_providers(self) -> Dict[str, Any]:
         """Verifica status dos provedores de IA"""
         try:
-            # Corrected import: Use instance ai_manager instead of class AIManager
-            from ai_manager import ai_manager
+            # Import correto do ai_manager
+            from services.ai_manager import ai_manager
 
             providers = {}
 
@@ -145,7 +145,7 @@ class HealthChecker:
             for provider_name in ['gemini', 'openai', 'groq', 'huggingface']:
                 try:
                     # Teste simples de geração
-                    test_response = ai_manager.generate_content("Test", max_tokens=10)
+                    test_response = ai_manager.generate_analysis("Test", max_tokens=10)
 
                     if test_response and len(test_response) > 0 and 'erro' not in test_response.lower():
                         providers[provider_name] = {
@@ -176,7 +176,7 @@ class HealthChecker:
     def _check_search_engines(self) -> Dict[str, Any]:
         """Verifica status dos mecanismos de busca"""
         try:
-            from production_search_manager import production_search_manager
+            from services.production_search_manager import production_search_manager
 
             engines = {}
 
@@ -280,11 +280,11 @@ class HealthChecker:
     def _check_database(self) -> Dict[str, Any]:
         """Verifica status do banco de dados"""
         try:
-            from database import get_db_connection # Changed from ..database to database
+            from database import db_manager
 
             # Tenta conectar e fazer query simples
-            conn = get_db_connection()
-            if conn:
+            conn_status = db_manager.test_connection()
+            if conn_status:
                 return {
                     'supabase': {
                         'status': 'healthy',

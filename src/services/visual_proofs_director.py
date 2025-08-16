@@ -622,6 +622,7 @@ Seja CRIATIVO, OUSADO e MEMORÁVEL. Esta PROVI deve ser tão impactante que se t
     def create_transformative_experience(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Cria experiência transformativa para o usuário"""
         try:
+            # Corrige para aceitar apenas um parâmetro conforme esperado
             return {
                 "experiencia_transformativa": {
                     "antes_depois": "Transformação clara e mensurável",

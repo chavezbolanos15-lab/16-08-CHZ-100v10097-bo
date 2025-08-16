@@ -266,23 +266,23 @@ class MentalDriversArchitect:
         ideal_drivers = []
 
         # Analisa dores para identificar drivers
-        dores = avatar_data.get('dores_viscerais', [])
+        dores = avatar_data.get('dores_viscerais', []) or avatar_data.get('feridas_abertas_inconfessaveis', [])
 
         # Mapeia dores para drivers
         if any('tempo' in dor.lower() for dor in dores):
-            ideal_drivers.append(self.universal_drivers['urgencia_temporal'])
+            ideal_drivers.append(self._load_universal_drivers()['urgencia_temporal'])
 
         if any('concorrência' in dor.lower() or 'competidor' in dor.lower() for dor in dores):
-            ideal_drivers.append(self.universal_drivers['escassez_oportunidade'])
+            ideal_drivers.append(self._load_universal_drivers()['escassez_oportunidade'])
 
         if any('resultado' in dor.lower() or 'crescimento' in dor.lower() for dor in dores):
-            ideal_drivers.append(self.universal_drivers['prova_social'])
+            ideal_drivers.append(self._load_universal_drivers()['prova_social'])
 
         # Sempre inclui autoridade técnica
-        ideal_drivers.append(self.universal_drivers['autoridade_tecnica'])
+        ideal_drivers.append(self._load_universal_drivers()['autoridade_tecnica'])
 
         # Sempre inclui reciprocidade
-        ideal_drivers.append(self.universal_drivers['reciprocidade'])
+        ideal_drivers.append(self._load_universal_drivers()['reciprocidade'])
 
         return ideal_drivers[:5]  # Máximo 5 drivers
 
@@ -499,6 +499,41 @@ RETORNE APENAS JSON VÁLIDO:
             'validation_status': 'FALLBACK_VALID',
             'generation_timestamp': time.time(),
             'fallback_mode': True
+        }
+
+    def _load_proof_types(self) -> Dict[str, Dict[str, Any]]:
+        """Carrega tipos de provas visuais"""
+        return {
+            'antes_depois': {
+                'nome': 'Transformação Antes/Depois',
+                'objetivo': 'Mostrar transformação clara e mensurável',
+                'impacto': 'Alto',
+                'facilidade': 'Média'
+            },
+            'comparacao_competitiva': {
+                'nome': 'Comparação vs Concorrência',
+                'objetivo': 'Demonstrar superioridade clara',
+                'impacto': 'Alto',
+                'facilidade': 'Alta'
+            },
+            'timeline_resultados': {
+                'nome': 'Timeline de Resultados',
+                'objetivo': 'Mostrar progressão temporal',
+                'impacto': 'Médio',
+                'facilidade': 'Alta'
+            },
+            'social_proof_visual': {
+                'nome': 'Prova Social Visual',
+                'objetivo': 'Validação através de terceiros',
+                'impacto': 'Alto',
+                'facilidade': 'Média'
+            },
+            'demonstracao_processo': {
+                'nome': 'Demonstração do Processo',
+                'objetivo': 'Mostrar como funciona na prática',
+                'impacto': 'Médio',
+                'facilidade': 'Baixa'
+            }
         }
 
 # Instância global

@@ -27,9 +27,16 @@ class VisualProofsGenerator:
     def generate_comprehensive_proofs(self, data: Dict[str, Any], *args, **kwargs) -> Dict[str, Any]:
         """Gera provas visuais abrangentes baseadas nos dados"""
         try:
-            segmento = data.get('segmento', '')
-            produto = data.get('produto', '')
-            publico = data.get('publico_alvo', data.get('publico', ''))
+            # Corrige acesso aos dados - pode ser dict ou lista
+            if isinstance(data, dict):
+                segmento = data.get('segmento', '')
+                produto = data.get('produto', '')
+                publico = data.get('publico_alvo', data.get('publico', ''))
+            else:
+                # Se data for lista ou outro tipo, usa valores padrão
+                segmento = 'Negócios'
+                produto = 'Produto/Serviço'
+                publico = 'Profissionais'
 
             prompt = f"""
             Crie um arsenal completo de PROVAS VISUAIS para:
@@ -71,7 +78,11 @@ class VisualProofsGenerator:
 
         except Exception as e:
             logger.error(f"❌ Erro ao gerar provas visuais: {e}")
-            return self._create_fallback_proofs(data.get('segmento', ''), data.get('produto', ''), data.get('publico', ''))
+            # Corrige acesso seguro aos dados
+            if isinstance(data, dict):
+                return self._create_fallback_proofs(data.get('segmento', ''), data.get('produto', ''), data.get('publico', ''))
+            else:
+                return self._create_fallback_proofs('Negócios', 'Produto/Serviço', 'Profissionais')
 
     def _create_fallback_proofs(self, segmento: str, produto: str, publico: str) -> Dict[str, Any]:
         """Cria provas visuais de fallback"""
